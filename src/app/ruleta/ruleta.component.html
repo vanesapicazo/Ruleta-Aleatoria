@@ -1,11 +1,13 @@
 <div class="container">
-  <canvas #wheelCanvas width="400" height="400"></canvas>
+  <canvas #wheelCanvas></canvas>
 
   <div class="arrow"></div>
 
-  <button (click)="spin()">Girar</button>
+  <button [disabled]="spinning" (click)="spin()">🎯 Girar</button>
 
   <div *ngIf="selectedOption" class="result">
-    ¡Ganaste: {{ selectedOption }}!
+    🎉 ¡Ganaste: {{ selectedOption }}!
   </div>
+
+  <audio #tickSound src="assets/tick.mp3"></audio>
 </div>

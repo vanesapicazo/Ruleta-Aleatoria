@@ -1,14 +1,16 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common'; // <-- importar esto
 
 @Component({
   selector: 'app-ruleta',
   standalone: true,
+  imports: [CommonModule], // <-- añadir aquí
   templateUrl: './ruleta.component.html',
   styleUrls: ['./ruleta.component.css'],
 })
 export class RuletaComponent implements AfterViewInit {
   @ViewChild('wheelCanvas') wheelCanvas!: ElementRef<HTMLCanvasElement>;
-  ctx!: CanvasRenderingContext2D;
+  @ViewChild('tickSound') tickSound!: ElementRef<HTMLAudioElement>;
 
   options: string[] = [
     'Premio 1',
@@ -17,6 +19,8 @@ export class RuletaComponent implements AfterViewInit {
     'Premio 4',
     'Premio 5',
     'Premio 6',
+    'Premio 7',
+    'Premio 8',
   ];
   colors: string[] = [
     '#FF5733',
@@ -25,14 +29,20 @@ export class RuletaComponent implements AfterViewInit {
     '#F333FF',
     '#FF33AA',
     '#FFD133',
+    '#33FFF6',
+    '#FF9A33',
   ];
 
-  rotation = 0;
+  ctx!: CanvasRenderingContext2D;
   spinning = false;
   selectedOption: string | null = null;
+  rotation = 0;
+  lastTick = 0;
 
   ngAfterViewInit() {
     const canvas = this.wheelCanvas.nativeElement;
+    canvas.width = 400;
+    canvas.height = 400;
     this.ctx = canvas.getContext('2d')!;
     this.drawWheel();
   }
@@ -61,8 +71,9 @@ export class RuletaComponent implements AfterViewInit {
       ctx.translate(centerX, centerY);
       ctx.rotate(startAngle + anglePerSegment / 2);
       ctx.fillStyle = 'white';
-      ctx.font = '16px Arial';
-      ctx.fillText(this.options[i], 80, 10);
+      ctx.font = 'bold 16px Arial';
+      ctx.textAlign = 'right';
+      ctx.fillText(this.options[i], radius - 10, 10);
       ctx.restore();
     }
   }
@@ -70,18 +81,29 @@ export class RuletaComponent implements AfterViewInit {
   spin() {
     if (this.spinning) return;
     this.spinning = true;
+    this.selectedOption = null;
 
     const extraDegrees = Math.floor(Math.random() * 360);
     const totalRotation = 360 * 5 + extraDegrees;
 
     const start = performance.now();
-    const duration = 4000;
+    const duration = 6000;
 
     const animate = (now: number) => {
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
       const ease = 1 - Math.pow(1 - progress, 3);
       this.rotation = totalRotation * ease;
+
+      const currentTick = Math.floor(
+        this.rotation / (360 / this.options.length)
+      );
+      if (currentTick !== this.lastTick) {
+        this.lastTick = currentTick;
+        this.tickSound.nativeElement
+          .play()
+          .catch((err) => console.error('Error sonido:', err));
+      }
 
       this.ctx.save();
       this.ctx.clearRect(0, 0, 400, 400);

@@ -1,31 +1,41 @@
 .container {
   position: relative;
-  width: 400px;
-  height: 450px;
+  width: 100%;
+  max-width: 400px;
   margin: 50px auto;
   text-align: center;
 }
 
+canvas {
+  width: 100%;
+  height: auto;
+  border: 4px solid #333;
+  border-radius: 50%;
+  background: #fff;
+}
+
 .arrow {
   position: absolute;
-  top: 0;
+  top: 10px;
   left: 50%;
-  margin-left: -10px;
+  transform: translateX(-50%);
   width: 0;
   height: 0;
-  border-left: 10px solid transparent;
-  border-right: 10px solid transparent;
-  border-bottom: 20px solid red;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 30px solid red;
+  z-index: 2;
 }
 
 button {
   margin-top: 20px;
   padding: 10px 20px;
-  font-size: 16px;
+  font-size: 18px;
 }
 
 .result {
   margin-top: 20px;
   font-size: 20px;
   font-weight: bold;
+  color: green;
 }
