@@ -1,0 +1,11 @@
+<div class="container">
+  <canvas #wheelCanvas width="400" height="400"></canvas>
+
+  <div class="arrow"></div>
+
+  <button (click)="spin()">Girar</button>
+
+  <div *ngIf="selectedOption" class="result">
+    ¡Ganaste: {{ selectedOption }}!
+  </div>
+</div>
