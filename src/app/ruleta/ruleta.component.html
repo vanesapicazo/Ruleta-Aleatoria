@@ -1,11 +1,19 @@
-<div class="container">
+<div class="position-relative d-inline-block">
   <canvas #wheelCanvas></canvas>
 
   <div class="arrow"></div>
 
-  <button [disabled]="spinning" (click)="spin()">🎯 Girar</button>
+  <div class="mt-4">
+    <button
+      class="btn btn-primary btn-lg"
+      [disabled]="spinning"
+      (click)="spin()"
+    >
+      🎯 Girar
+    </button>
+  </div>
 
-  <div *ngIf="selectedOption" class="result">
+  <div *ngIf="selectedOption" class="alert alert-success mt-3 fw-bold">
     🎉 ¡Ganaste: {{ selectedOption }}!
   </div>
 
