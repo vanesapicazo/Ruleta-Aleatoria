@@ -2,16 +2,11 @@
   display: block;
 }
 
-canvas {
-  width: 400px;
-  height: 400px;
-}
-
 .arrow {
   position: absolute;
   top: 50%;
-  left: 410px;
-  transform: translateY(-50%) rotate(-90deg);
+  left: 100%;
+  transform: translate(-50%, -50%) rotate(-90deg);
   width: 0;
   height: 0;
   border-left: 15px solid transparent;

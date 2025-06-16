@@ -1,20 +1,19 @@
-<div class="position-relative d-inline-block">
-  <canvas #wheelCanvas></canvas>
+<div
+  class="position-relative d-inline-block"
+  style="width: 400px; height: 400px"
+>
+  <canvas #wheelCanvas class="w-100 h-100"></canvas>
 
   <div class="arrow"></div>
+</div>
 
-  <div class="mt-4">
-    <button
-      class="btn btn-primary btn-lg"
-      [disabled]="spinning"
-      (click)="spin()"
-    >
-      🎯 Girar
-    </button>
-  </div>
+<div class="mt-4 text-center">
+  <button class="btn btn-primary btn-lg" [disabled]="spinning" (click)="spin()">
+    🎯 Girar
+  </button>
 
   <div *ngIf="selectedOption" class="alert alert-success mt-3 fw-bold">
-    🎉 ¡Ganaste: {{ selectedOption }}!
+    ¡{{ selectedOption }}!
   </div>
 
   <audio #tickSound src="assets/tick.mp3"></audio>

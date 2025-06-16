@@ -1,10 +1,10 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common'; // <-- importar esto
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-ruleta',
   standalone: true,
-  imports: [CommonModule], // <-- añadir aquí
+  imports: [CommonModule],
   templateUrl: './ruleta.component.html',
   styleUrls: ['./ruleta.component.css'],
 })
@@ -117,15 +117,15 @@ export class RuletaComponent implements AfterViewInit {
         requestAnimationFrame(animate);
       } else {
         this.spinning = false;
-        this.getResult(totalRotation);
+        this.getResult(this.rotation);
       }
     };
 
     requestAnimationFrame(animate);
   }
 
-  getResult(totalRotation: number) {
-    const degrees = totalRotation % 360;
+  getResult(rotation: number) {
+    const degrees = (rotation + 360 / this.options.length / 2) % 360;
     const segmentAngle = 360 / this.options.length;
     const index = Math.floor(
       ((360 - degrees + segmentAngle / 2) % 360) / segmentAngle
