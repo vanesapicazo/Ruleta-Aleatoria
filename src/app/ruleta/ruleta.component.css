@@ -14,3 +14,10 @@
   border-bottom: 30px solid red;
   z-index: 10;
 }
+
+.position-relative {
+  width: 100%;
+  height: auto; /* No fijo */
+  aspect-ratio: 1 / 1;
+  max-height: 75vh;
+}

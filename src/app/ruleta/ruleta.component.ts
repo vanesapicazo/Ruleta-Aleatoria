@@ -1,10 +1,11 @@
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-ruleta',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './ruleta.component.html',
   styleUrls: ['./ruleta.component.css'],
 })
@@ -12,26 +13,11 @@ export class RuletaComponent implements AfterViewInit {
   @ViewChild('wheelCanvas') wheelCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('tickSound') tickSound!: ElementRef<HTMLAudioElement>;
 
-  options: string[] = [
-    'Premio 1',
-    'Premio 2',
-    'Premio 3',
-    'Premio 4',
-    'Premio 5',
-    'Premio 6',
-    'Premio 7',
-    'Premio 8',
-  ];
-  colors: string[] = [
-    '#FF5733',
-    '#33FF57',
-    '#3357FF',
-    '#F333FF',
-    '#FF33AA',
-    '#FFD133',
-    '#33FFF6',
-    '#FF9A33',
-  ];
+  options: string[] = [];
+  optionsText: string = `1\n2\n3\n4`; // valores iniciales
+  ruletaName: string = 'Ruleta #1';
+  colors: string[] = [];
+  savedRuletas: { name: string; options: string[] }[] = [];
 
   ctx!: CanvasRenderingContext2D;
   spinning = false;
@@ -40,21 +26,49 @@ export class RuletaComponent implements AfterViewInit {
   lastTick = 0;
 
   ngAfterViewInit() {
+    this.ctx = this.wheelCanvas.nativeElement.getContext('2d')!;
+    this.resizeCanvas();
+    window.addEventListener('resize', () => this.resizeCanvas());
+
+    this.loadRuletasFromStorage(); // <--- carga
+    this.updateOptionsFromText();
+  }
+
+  resizeCanvas() {
     const canvas = this.wheelCanvas.nativeElement;
-    canvas.width = 400;
-    canvas.height = 400;
-    this.ctx = canvas.getContext('2d')!;
+    const parent = canvas.parentElement!;
+    const size = Math.min(parent.clientWidth, window.innerHeight * 0.75);
+    canvas.width = size;
+    canvas.height = size;
     this.drawWheel();
   }
 
+  updateOptionsFromText() {
+    const rawOptions = this.optionsText
+      .split('\n')
+      .map((o) => o.trim())
+      .filter((o) => o !== '');
+    this.options = rawOptions;
+    this.generateColors();
+    this.drawWheel();
+  }
+
+  generateColors() {
+    this.colors = this.options.map(
+      (_, i) => `hsl(${(i * 360) / this.options.length}, 70%, 60%)`
+    );
+  }
+
   drawWheel() {
+    const canvas = this.wheelCanvas.nativeElement;
     const ctx = this.ctx;
-    const radius = 200;
-    const centerX = 200;
-    const centerY = 200;
+    const size = canvas.width;
+    const radius = size / 2;
+    const centerX = radius;
+    const centerY = radius;
     const anglePerSegment = (2 * Math.PI) / this.options.length;
 
-    ctx.clearRect(0, 0, 400, 400);
+    ctx.clearRect(0, 0, size, size);
 
     for (let i = 0; i < this.options.length; i++) {
       const startAngle = i * anglePerSegment;
@@ -71,7 +85,7 @@ export class RuletaComponent implements AfterViewInit {
       ctx.translate(centerX, centerY);
       ctx.rotate(startAngle + anglePerSegment / 2);
       ctx.fillStyle = 'white';
-      ctx.font = 'bold 16px Arial';
+      ctx.font = `bold ${Math.floor(size / 25)}px Arial`;
       ctx.textAlign = 'right';
       ctx.fillText(this.options[i], radius - 10, 10);
       ctx.restore();
@@ -100,16 +114,18 @@ export class RuletaComponent implements AfterViewInit {
       );
       if (currentTick !== this.lastTick) {
         this.lastTick = currentTick;
-        this.tickSound.nativeElement
-          .play()
-          .catch((err) => console.error('Error sonido:', err));
+        this.tickSound.nativeElement.play().catch(console.error);
       }
 
+      const canvas = this.wheelCanvas.nativeElement;
+      const size = canvas.width;
+      const half = size / 2;
+
       this.ctx.save();
-      this.ctx.clearRect(0, 0, 400, 400);
-      this.ctx.translate(200, 200);
+      this.ctx.clearRect(0, 0, size, size);
+      this.ctx.translate(half, half);
       this.ctx.rotate((this.rotation * Math.PI) / 180);
-      this.ctx.translate(-200, -200);
+      this.ctx.translate(-half, -half);
       this.drawWheel();
       this.ctx.restore();
 
@@ -131,5 +147,38 @@ export class RuletaComponent implements AfterViewInit {
       ((360 - degrees + segmentAngle / 2) % 360) / segmentAngle
     );
     this.selectedOption = this.options[index];
+  }
+
+  saveCurrentRuleta() {
+    if (!this.ruletaName.trim() || this.options.length === 0) return;
+
+    const exists = this.savedRuletas.find((r) => r.name === this.ruletaName);
+    if (exists) {
+      exists.options = [...this.options];
+    } else {
+      this.savedRuletas.push({
+        name: this.ruletaName.trim(),
+        options: [...this.options],
+      });
+    }
+
+    this.persistRuletas(); // <--- guarda en localStorage
+  }
+
+  loadRuleta(ruleta: { name: string; options: string[] }) {
+    this.ruletaName = ruleta.name;
+    this.optionsText = ruleta.options.join('\n');
+    this.updateOptionsFromText();
+  }
+
+  persistRuletas() {
+    localStorage.setItem('ruletas', JSON.stringify(this.savedRuletas));
+  }
+
+  loadRuletasFromStorage() {
+    const data = localStorage.getItem('ruletas');
+    if (data) {
+      this.savedRuletas = JSON.parse(data);
+    }
   }
 }
