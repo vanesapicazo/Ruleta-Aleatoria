@@ -1,4 +1,11 @@
-import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  Output,
+  EventEmitter,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -12,6 +19,7 @@ import { FormsModule } from '@angular/forms';
 export class RuletaComponent implements AfterViewInit {
   @ViewChild('wheelCanvas') wheelCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('tickSound') tickSound!: ElementRef<HTMLAudioElement>;
+  @Output() resultSelected = new EventEmitter<string>();
 
   options: string[] = [];
   optionsText: string = `1\n2\n3\n4`; // valores iniciales
@@ -85,9 +93,22 @@ export class RuletaComponent implements AfterViewInit {
       ctx.translate(centerX, centerY);
       ctx.rotate(startAngle + anglePerSegment / 2);
       ctx.fillStyle = 'white';
-      ctx.font = `bold ${Math.floor(size / 25)}px Arial`;
+
+      const text = this.options[i];
+
+      // Escala el tamaño según el número de opciones
+      let fontSize =
+        size / (this.options.length < 10 ? 18 : this.options.length / 0.6);
+
+      // Limita los tamaños mínimo y máximo
+      fontSize = Math.max(10, Math.min(fontSize, size / 12));
+
+      ctx.font = `bold ${fontSize}px Arial`;
+
+      ctx.font = `bold ${fontSize}px Arial`;
       ctx.textAlign = 'right';
-      ctx.fillText(this.options[i], radius - 10, 10);
+      ctx.fillText(text, radius - 10, 10);
+
       ctx.restore();
     }
   }
@@ -147,6 +168,8 @@ export class RuletaComponent implements AfterViewInit {
       ((360 - degrees + segmentAngle / 2) % 360) / segmentAngle
     );
     this.selectedOption = this.options[index];
+    console.log('Ganador:', this.selectedOption);
+    this.resultSelected.emit(this.selectedOption);
   }
 
   saveCurrentRuleta() {
@@ -163,6 +186,17 @@ export class RuletaComponent implements AfterViewInit {
     }
 
     this.persistRuletas(); // <--- guarda en localStorage
+  }
+
+  deleteRuleta(index: number) {
+    if (
+      confirm(
+        `¿Estás seguro de que deseas eliminar la ruleta "${this.savedRuletas[index].name}"?`
+      )
+    ) {
+      this.savedRuletas.splice(index, 1);
+      this.persistRuletas(); // actualiza localStorage
+    }
   }
 
   loadRuleta(ruleta: { name: string; options: string[] }) {

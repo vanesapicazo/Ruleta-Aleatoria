@@ -1,7 +1,11 @@
 <div class="container py-5 text-center">
-  <h1 class="mb-4">Ruleta Aleatoria</h1>
+  <h1 class="mb-4" *ngIf="!winner">Ruleta Aleatoria</h1>
+  <div *ngIf="winner" class="alert alert-success mt-3 fw-bold text-center">
+    🎉 ¡{{ winner }}! 🎉
+  </div>
+  <!--<h1 class="mb-4 text-success" *ngIf="winner">Ganador: {{ winner }}</h1>-->
 
   <div class="d-flex justify-content-center position-relative">
-    <app-ruleta></app-ruleta>
+    <app-ruleta (resultSelected)="winner = $event"></app-ruleta>
   </div>
 </div>
